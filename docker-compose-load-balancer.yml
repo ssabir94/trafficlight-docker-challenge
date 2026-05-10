@@ -1,0 +1,39 @@
+services:
+
+  red-app:
+    image: trafficlight/red:v1.0
+    container_name: red-app
+    networks:
+      - traffic-light
+
+  yellow-app:
+    image: trafficlight/yellow:v1.0
+    container_name: yellow-app
+    networks:
+      - traffic-light
+
+  green-app:
+    image: trafficlight/green:v1.0
+    container_name: green-app
+    networks:
+      - traffic-light
+
+  nginx-load-balancer:
+    image: nginx:1.21
+    container_name: nginx-load-balancer
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx/conf.d/load-balancer.conf:/etc/nginx/conf.d/default.conf
+      - ./auth/.htpasswd:/etc/nginx/.htpasswd
+      - /var/log/nginx:/var/log/nginx
+    networks:
+      - traffic-light
+    depends_on:
+      - red-app
+      - yellow-app
+      - green-app
+
+networks:
+  traffic-light:
+    external: true
